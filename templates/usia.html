@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Pengecekan Usia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Font dan CSS khusus cek usia -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Css/usia.css') }}">
+</head>
+<body>
+    <div class="tag-box">
+        <h1 class="tag">CEK USIA MU</h1>
+        <form method="POST" action="">
+            <label for="tahun_lahir">Masukkan Tahun Lahir Kamu Sob:</label>
+            <input type="number" id="tahun_lahir" name="tahun_lahir" min="1900" max="2100" placeholder="Contoh: 2000" required>
+            <button type="submit">Hitung Usia</button>
+        </form>
+        {% if usia is not none %}
+            <h2 style="margin-top:24px;">Usia Anda: {{usia}} tahun</h2>
+            <h3>{{ai_output}}</h3>
+        {% endif %}
+        <a href="/">Kembali ke halaman utama</a>
+        <div class="footer">
+            &copy; 2025 WEB AJAIB. Dibuat dengan ❤️ oleh Rislan Tristansyah.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Css/base.css') }}">
+    <title>Home</title>
+</head>
+<body>
+<nav class="container">
+    <header>    
+        <div class="logo">
+            <a href="#"><img class= "logo_img" src="/static/Gambar/Logo.png" alt="Logo"></a>
+        </div>
+        <nav>
+            <ul>
+                <li class="dropdown">
+                    <a href="#">Fitur</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/usia">Cek Usia</a></li>
+                        <li><a href="/kuis">Kuis</a></li>
+                        <li><a href="/_stop_judol">Stop Judol</a></li>
+                    </ul>
+                </li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/docs">Docs</a></li>
+            </ul>
+        </nav>
+        <div class="loginRight">
+            <a href="/login">Login</a>
+        </div>
+    </header>
+</nav>
+
+<section>
+    <div class="tag-box">
+        <h1 class="tag">Selamat Datang <br>
+            Di {{Web_title}}</h1>
+        <p class="deksripsi">Ini adalah halaman utama dari aplikasi web ajaib yang dibuat dengan Python dan Flask.</p>
+    </div>
+    <spline-viewer class="hero-spline" url="https://prod.spline.design/83L3CcoICgpHGCkF/scene.splinecode"></spline-viewer>
+</section>
+<script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js"></script>
+
+<footer>
+    &copy; 2025 WEB AJAIB. Dibuat dengan ❤️ oleh Rislan Tristansyah.
+</footer>
+</body>
+</html>

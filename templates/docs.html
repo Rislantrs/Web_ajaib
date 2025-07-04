@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentasi - WEB AJAIB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Gaya dasar untuk halaman */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #a7bbc7 0%, #2c3e50 30%, #232526 60%);
+            background-attachment: fixed; /* Membuat background tidak ikut scroll */
+            color: #e7e7e7;
+        }
+
+        /* Kontainer utama untuk semua konten dokumentasi */
+        .docs-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        /* Judul utama halaman */
+        .docs-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #e5e7eb; /* Warna dari contoh Anda */
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Paragraf pengantar */
+        .docs-intro {
+            text-align: center;
+            font-size: 1.1em;
+            color: #d1d5db; /* Warna dari contoh Anda */
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* Judul setiap seksi (Fitur & Teknologi) */
+        .section-title {
+            font-size: 2em;
+            color: #e5e7eb;
+            border-bottom: 2px solid #60a5fa; /* Warna dari contoh Anda */
+            padding-bottom: 10px;
+            margin-top: 50px;
+            margin-bottom: 30px;
+        }
+
+        /* Gaya untuk setiap kotak kontainer (Gaya Kaca) */
+        .doc-box {
+            background: rgba(255, 255, 255, 0.1); /* Latar transparan */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .doc-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Judul di dalam setiap kotak */
+        .doc-box h3 {
+            font-size: 1.5em;
+            color: #60a5fa; /* Warna dari contoh Anda */
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        /* Teks paragraf di dalam setiap kotak */
+        .doc-box p, .doc-box li {
+            font-size: 1em;
+            color: #d1d5db; /* Warna dari contoh Anda */
+            line-height: 1.7;
+        }
+        
+        /* Gaya untuk daftar teknologi */
+        .tech-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .tech-list li {
+            padding-left: 25px;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .tech-list li::before {
+            content: '✓';
+            color: #2ecc71;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        .tech-list strong {
+            color: #e5e7eb;
+        }
+
+        /* Tombol Kembali */
+        .back-button-container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .btn-kembali {
+            width: auto;
+            padding: 12px 30px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1em;
+        }
+        .btn-kembali:hover {
+            background-color: #1f2937;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="docs-container">
+        <h1 class="docs-title">Dokumentasi WEB AJAIB</h1>
+        <p class="docs-intro">
+            WEB AJAIB adalah sebuah platform inovatif yang dirancang untuk membuktikan bahwa teknologi dapat menjadi kekuatan untuk kebaikan. Misi kami adalah menggabungkan hiburan interaktif dengan edukasi yang mendalam, menciptakan pengalaman yang tidak hanya menyenangkan tetapi juga mencerahkan.
+        </p>
+
+        <!-- Seksi Fitur -->
+        <h2 class="section-title">Fitur Unggulan Kami</h2>
+
+        <div class="doc-box">
+            <h3>Cek Usia & Fakta Teknologi</h3>
+            <p>
+                Ini bukan sekadar kalkulator umur biasa. Fitur ini adalah mesin waktu mini yang membawa Anda kembali ke tahun kelahiran Anda. Sambil menghitung usia Anda, teknologi AI kami akan menyajikan satu fakta unik dan menarik tentang perkembangan teknologi pada tahun tersebut. Ini adalah cara kami membuat perjalanan nostalgia Anda menjadi sebuah momen pembelajaran.
+            </p>
+        </div>
+
+        <div class="doc-box">
+            <h3>Kuis Cerdas (AI-Powered Quiz)</h3>
+            <p>
+                Sebagai bentuk dukungan terhadap pencerdasan bangsa, kami mempersembahkan Kuis Harian yang didukung penuh oleh AI. Setiap sesi kuis adalah unik karena soal-soal pengetahuan umumnya dibuat secara dinamis. Dengan tiga kesempatan setiap hari—sebagai analogi kerja pagi, siang, dan malam—fitur ini mengajarkan bahwa poin adalah sesuatu yang didapat melalui usaha, bukan keberuntungan.
+            </p>
+        </div>
+
+        <div class="doc-box">
+            <h3>Simulasi Stop Judol</h3>
+            <p>
+                Kami percaya cara terbaik untuk memahami bahaya judi online (judol) adalah dengan merasakan langsung mekanismenya di lingkungan yang aman. Fitur ini adalah platform untuk menyadarkan bahwa judol adalah algoritma yang dirancang untuk menciptakan ketagihan yang berujung pada kesengsaraan. Melalui simulasi probabilitas yang dinamis dan "kemenangan palsu", kami membongkar jebakan psikologis yang digunakan platform judi.
+            </p>
+        </div>
+
+        <!-- Seksi Teknologi -->
+        <h2 class="section-title">Teknologi di Balik Layar</h2>
+
+        <div class="doc-box">
+            <h3>Backend</h3>
+            <ul class="tech-list">
+                <li><strong>Python:</strong> Bahasa pemrograman utama yang menjadi tulang punggung semua logika aplikasi.</li>
+                <li><strong>Flask:</strong> <em>Framework micro</em> yang ringan dan kuat untuk membangun aplikasi web.</li>
+                <li><strong>SQLite:</strong> Sistem database ringkas untuk menyimpan data pengguna, poin, dan progres permainan.</li>
+            </ul>
+        </div>
+
+        <div class="doc-box">
+            <h3>Frontend</h3>
+            <ul class="tech-list">
+                <li><strong>HTML5 & CSS3:</strong> Struktur dan gaya standar untuk membangun antarmuka yang responsif.</li>
+                <li><strong>JavaScript:</strong> Memberikan interaktivitas pada fitur-fitur seperti mesin "Stop Judol".</li>
+                <li><strong>Spline:</strong> Teknologi untuk menampilkan model robot 3D interaktif di halaman utama.</li>
+            </ul>
+        </div>
+        
+        <div class="doc-box">
+            <h3>Kecerdasan Buatan (AI)</h3>
+            <ul class="tech-list">
+                <li><strong>Groq API:</strong> Platform yang menyediakan akses super cepat ke model AI canggih.</li>
+                <li><strong>Llama 3 & Gemma 2:</strong> Model bahasa besar yang kami gunakan untuk menjawab pertanyaan dan membuat soal kuis secara dinamis.</li>
+            </ul>
+        </div>
+
+        <div class="doc-box">
+            <h3>Keamanan & Lainnya</h3>
+            <ul class="tech-list">
+                <li><strong>Password Hashing (Werkzeug):</strong> Kami tidak pernah menyimpan <em>password</em> Anda dalam bentuk teks biasa, melainkan dalam bentuk hash yang aman.</li>
+                <li><strong>Flask Session:</strong> Menggunakan sistem sesi yang aman untuk "mengingat" status login Anda, dilindungi oleh kunci rahasia.</li>
+                <li><strong>DiceBear API:</strong> Layanan eksternal untuk membuat avatar profil yang unik dan acak bagi setiap pengguna.</li>
+            </ul>
+        </div>
+
+        <!-- Tombol Kembali -->
+        <div class="back-button-container">
+            <a href="{{ url_for('hello_world') }}" class="btn-kembali">Kembali ke Beranda</a>
+        </div>
+
+    </div>
+</body>
+</html>

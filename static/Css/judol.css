@@ -1,0 +1,360 @@
+/* RESET DAN BASE STYLING - IKUTI BASE.CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #a7bbc7 0%, #2c3e50 30%, #232526 60%);
+    color: #e7e7e7;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* CONTAINER UTAMA - GLASSMORPHISM SEPERTI PROFILE DROPDOWN */
+.game-container {
+    background: rgba(30, 30, 30, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    width: 420px;
+    max-width: 90vw;
+    position: relative;
+}
+
+/* JUDUL */
+.game-container h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #e7e7e7;
+    margin-bottom: 25px;
+    text-shadow: 0 0 10px rgba(14, 21, 99, 0.5);
+}
+
+/* SLOT MACHINE */
+.slot-machine {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 25px 0;
+    background: rgba(52, 73, 94, 0.3);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.reel {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.symbols {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+    /* BACKGROUND UNTUK GAMBAR TRANSPARAN */
+    background: linear-gradient(135deg, #a7bbc7, #2c3e50);
+    border-radius: 6px;
+}
+
+.symbols img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* INFO DISPLAY */
+.info-display {
+    background: rgba(255, 255, 255, 0.05);
+    color: #e7e7e7;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 20px 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-display strong {
+    color: #a7bbc7;
+}
+
+/* BET CONTROLS */
+.bet-controls {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bet-controls label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e7e7e7;
+    margin-bottom: 8px;
+}
+
+.bet-controls input {
+    width: 100px;
+    padding: 8px 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    text-align: center;
+    margin-right: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #e7e7e7;
+    transition: all 0.2s ease;
+}
+
+.bet-controls input:focus {
+    outline: none;
+    border-color: #a7bbc7;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.bet-controls input::placeholder {
+    color: rgba(231, 231, 231, 0.6);
+}
+
+#max-bet-button {
+    background: rgba(167, 187, 199, 0.8);
+    color: #232526;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+#max-bet-button:hover {
+    background: #a7bbc7;
+    transform: translateY(-1px);
+}
+
+/* GAME CONTROLS */
+.game-controls {
+    margin: 20px 0;
+}
+
+#spin-button {
+    background: linear-gradient(135deg, #a7bbc7, #2c3e50);
+    color: #e7e7e7;
+    border: none;
+    padding: 12px 32px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(167, 187, 199, 0.3);
+}
+
+#spin-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(167, 187, 199, 0.4);
+}
+
+#spin-button:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(231, 231, 231, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* TOMBOL KEMBALI */
+.btn-kembali {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e7e7e7;
+    text-decoration: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin-top: 20px;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-kembali:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: #fff;
+}
+
+/* POPUP MESSAGE - IKUTI STYLE ALERT */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.popup-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-content {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.7);
+    transition: transform 0.3s ease;
+}
+
+.popup-overlay.show .popup-content {
+    transform: scale(1);
+}
+
+.popup-content h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #e7e7e7;
+    margin-bottom: 15px;
+}
+
+.popup-content p {
+    font-size: 1rem;
+    color: #ccc;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.popup-close {
+    background: linear-gradient(135deg, #a7bbc7, #2c3e50);
+    color: #e7e7e7;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.popup-close:hover {
+    transform: translateY(-1px);
+}
+
+/* RESULT STYLES - IKUTI ALERT COLORS */
+.popup-content.success {
+    border-left: 4px solid #28a745;
+}
+
+.popup-content.success h3 {
+    color: #28a745;
+}
+
+.popup-content.loss {
+    border-left: 4px solid #dc3545;
+}
+
+.popup-content.loss h3 {
+    color: #dc3545;
+}
+
+.popup-content.warning {
+    border-left: 4px solid #ffc107;
+}
+
+.popup-content.warning h3 {
+    color: #ffc107;
+}
+
+/* ANIMASI SPINNING */
+@keyframes spin {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-320px); }
+}
+
+.reel.spinning .symbols {
+    animation: spin 0.1s linear infinite;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .game-container {
+        padding: 20px;
+        width: 100%;
+    }
+
+    .game-container h1 {
+        font-size: 1.5rem;
+    }
+
+    .slot-machine {
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .reel {
+        width: 70px;
+        height: 70px;
+    }
+
+    .symbols img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .bet-controls input {
+        width: 80px;
+        margin-right: 8px;
+    }
+
+    .popup-content {
+        padding: 20px;
+        margin: 20px;
+    }
+}
+
+/* HIDDEN RESULT MESSAGE */
+#result-message {
+    display: none;
+}

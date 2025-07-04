@@ -1,0 +1,12 @@
+# Folder virtual environment Python
+venv/
+__pycache__/
+
+# File environment yang berisi rahasia
+.env
+
+# Database lokal SQLite
+database.db
+
+# File sistem operasi (opsional, tapi bagus)
+.DS_Store

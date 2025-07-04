@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kuis Pengetahuan Umum</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Css/kuis.css') }}">
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages" style="position:fixed;top:20px;right:20px;z-index:9999;">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" style="background:rgba(0,0,0,0.8);color:#fff;padding:12px 16px;margin-bottom:8px;border-radius:8px;min-width:300px;backdrop-filter:blur(10px);">
+                        {{ message }}
+                        <button onclick="this.parentElement.style.display='none'" style="float:right;background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <div class="kuis-container">
+        {% if selesai %}
+            <div class="hasil-container">
+                <div class="hasil-skor">{{ skor }}/{{ total_soal }}</div>
+                <div class="hasil-text">
+                    Selamat! Anda telah menyelesaikan kuis sesi ke-{{ sudah_main }}.<br>
+                    Poin telah ditambahkan ke akun Anda.<br>
+                    {% if sisa_main > 0 %}
+                        <strong>Sisa kesempatan hari ini: {{ sisa_main }}x</strong>
+                    {% else %}
+                        <strong>Anda sudah menyelesaikan 3x kuis hari ini!</strong>
+                    {% endif %}
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    {% if sisa_main > 0 %}
+                        <a href="/kuis" class="btn-kembali" style="margin-right: 15px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">Main Lagi</a>
+                    {% endif %}
+                    <a href="/" class="btn-kembali">Kembali ke Beranda</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="kuis-header">
+                <h1 class="kuis-title">Kuis Harian</h1>
+                <div class="kuis-progress">Soal {{ nomor_soal }} dari {{ total_soal }}</div>
+            </div>
+
+            <div class="soal-container">
+                <div class="soal-text">{{ soal.pertanyaan }}</div>
+                
+                <form method="POST">
+                    <div class="pilihan-container">
+                        {% for pilihan in soal.pilihan %}
+                            <label class="pilihan-item">
+                                <input type="radio" name="pilihan" value="{{ pilihan }}" required>
+                                {{ pilihan }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn-submit">
+                        {% if nomor_soal < total_soal %}
+                            Lanjut ke Soal Berikutnya
+                        {% else %}
+                            Selesaikan Kuis
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Auto-hide flash messages setelah 5 detik
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.style.display = 'none';
+                }, 300);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

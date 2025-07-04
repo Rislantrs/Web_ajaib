@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Profil</title>
+    <!-- (Sertakan link CSS yang sama seperti dashboard) -->
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="profile-content">
+            <h1 style="text-align: center;">Edit Profil Anda</h1>
+            <!-- enctype="multipart/form-data" PENTING untuk upload file -->
+            <form action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data">
+                <div>
+                    <label for="NamaLengkap">Nama Lengkap:</label>
+                    <input type="text" id="NamaLengkap" name="NamaLengkap" value="{{ user['nama_lengkap'] }}" required>
+                </div>
+                <br>
+                <div>
+                    <label for="FotoProfil">Ganti Foto Profil:</label>
+                    <input type="file" id="FotoProfil" name="FotoProfil" accept="image/*">
+                    <p><small>Biarkan kosong jika tidak ingin mengganti foto.</small></p>
+                </div>
+                <br>
+                <div class="actions">
+                    <button type="submit" class="btn btn-edit">Simpan Perubahan</button>
+                    <a href="{{ url_for('hello_world') }}" class="btn btn-logout">Batal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

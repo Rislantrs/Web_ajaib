@@ -1,0 +1,71 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    backdrop-filter: blur(8px);
+}
+
+.containerLogin {
+    background:rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur (12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 30px;
+    border: 1px solid rgba(255,255,255, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    width: 300px;
+    color:white;
+    text-align: center;
+}
+
+.containerLogin h2 {
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #e5e7eb;
+    font-size: 24px;
+}
+
+.containerLogin input[type="text"],.containerLogin input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0 15px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 14px;
+    outline: none;
+}
+
+.containerLogin input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.containerLogin button {
+    width: 100%;
+    padding: 10px;
+    background: #000;
+    color:white;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+    margin-top: 10px;
+    cursor:pointer;
+}
+
+.containerLogin button:hover {
+    background-color:#1f2937;
+}
+
+.containerLogin a {
+    color: #60a5fa;
+    text-decoration: none;
+}
+
+.containerLogin p {
+    font-size: 13px;
+    color: #d1d5db;
+    margin-top: 15px;
+}

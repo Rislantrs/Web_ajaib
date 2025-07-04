@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Css/base.css') }}">
+    <title>Home</title>
+</head>
+<body>
+ <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages" style="position:fixed;top:20px;right:20px;z-index:9999;">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" style="background:rgba(0,0,0,0.8);color:#fff;padding:12px 16px;margin-bottom:8px;border-radius:8px;min-width:300px;backdrop-filter:blur(10px);">
+                        {{ message }}
+                        <button onclick="this.parentElement.style.display='none'" style="float:right;background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+<nav class="container">
+    <header>    
+        <div class="logo">
+            <a href="#"><img class= "logo_img" src="/static/Gambar/Logo.png" alt="Logo"></a>
+        </div>
+        <nav>
+            <ul>
+                <li class="dropdown">
+                    <a href="#">Fitur</a>
+                    <ul class="dropdown-content">
+                        <li><a href="/usia">Cek Usia</a></li>
+                        <li><a href="/kuis">Kuis</a></li>
+                        <li><a href="/stop_judol">Stop Judol</a></li>
+                    </ul>
+                </li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/docs">Docs</a></li>
+            </ul>
+        </nav>
+        
+        <div class="profile-menu-container">
+        <button id="profile-toggle">
+            {% if logged_in %}
+                    <img src="https://api.dicebear.com/8.x/{{ user.avatar_style | default('initials') }}/svg?seed={{ user.username | default('') }}" alt="Avatar">
+            {% else %}
+                <img src="https://api.dicebear.com/8.x/initials/svg?seed=?" alt="Login">
+            {% endif %}
+        </button>
+        <div id="profile-dropdown" class="profile-dropdown">
+            {% if logged_in %}
+                <div class="dropdown-header">
+                    <img src="https://api.dicebear.com/8.x/{{ user.avatar_style | default('initials') }}/svg?seed={{ user.username | default('') }}" alt="Avatar" class="avatar">
+                    <h3>Halo, {{ user.nama_lengkap | default('Pengguna') }}</h3>
+                    <p>@{{ user.username | default('user') }}</p>
+                    <p>Poin: <b>{{ user.poin | default(0) }}</b></p>
+                </div>
+                <div class="dropdown-actions">
+                    <a href="{{ url_for('edit_profile') }}">Kelola Akun</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </div>
+            {% else %}
+                <div class="dropdown-header">
+                    <h3>Selamat Datang!</h3>
+                    <p>Silakan login untuk melanjutkan.</p>
+                </div>
+                <div class="dropdown-actions">
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('daftar') }}">Daftar</a>
+                </div>
+            {% endif %}
+        </div>     
+    </header>
+</nav>
+
+<section>
+    <div class="tag-box">
+        <h1 class="tag">Selamat Datang <br>
+            {{user.nama_lengkap}}</h1>
+        <p class="deksripsi">Ini adalah halaman utama dari aplikasi web ajaib yang dibuat dengan Python dan Flask.</p>
+    </div>
+    <spline-viewer class="hero-spline" url="https://prod.spline.design/83L3CcoICgpHGCkF/scene.splinecode"></spline-viewer>
+</section>
+<script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js"></script>
+
+<footer>
+    &copy; 2025 WEB AJAIB. Dibuat dengan ❤️ oleh Rislan Tristansyah.
+</footer>
+
+<script>
+    // JavaScript tidak perlu diubah
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileToggle = document.getElementById('profile-toggle');
+        const profileDropdown = document.getElementById('profile-dropdown');
+        profileToggle.addEventListener('click', function(event) {
+            event.stopPropagation();
+            profileDropdown.classList.toggle('show');
+        });
+        window.addEventListener('click', function(event) {
+            if (!profileDropdown.contains(event.target) && !profileToggle.contains(event.target)) {
+                if (profileDropdown.classList.contains('show')) {
+                    profileDropdown.classList.remove('show');
+                }
+            }
+        });
+    });
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.style.display = 'none';
+            }, 300);
+        });
+    }, 5000);
+</script>
+
+</body>
+</html>
