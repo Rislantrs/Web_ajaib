@@ -21,8 +21,6 @@ client = OpenAI(
 # 2. INISIALISASI APLIKASI FLASK
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # 3. FUNGSI AI
 def ai_call(year):
