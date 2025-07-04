@@ -68,12 +68,6 @@ def ai_call(year):
         print(f"Gagal ambil respon: {e}")
         return "Maaf, tidak bisa memproses permintaan saat ini."
 
-# 4. FUNGSI BANTU DAN KONFIGURASI
-def get_db_connection():
-    conn = sqlite3.connect('database.db')
-    conn.row_factory = sqlite3.Row
-    return conn
-
 AVATAR_STYLES = [
     'adventurer', 'adventurer-neutral', 'avataaars', 'big-ears', 
     'big-smile', 'bottts', 'croodles', 'fun-emoji', 'icons', 
