@@ -22,6 +22,28 @@ client = OpenAI(
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 
+def init_database():
+    conn = get_db_connection()
+    # Perintah SQL untuk membuat tabel users
+    # IF NOT EXISTS penting agar tidak error jika tabel sudah ada
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            nama_lengkap TEXT,
+            poin INTEGER DEFAULT 0,
+            kuis_terakhir_dimainkan TEXT,
+            kuis_dimainkan_hari_ini INTEGER DEFAULT 0,
+            avatar_style TEXT,
+            judol_losing_streak INTEGER DEFAULT 0,
+            judol_bomb_strike_active INTEGER DEFAULT 0
+        );
+    ''')
+    conn.commit()
+    conn.close()
+    print("Database initialized successfully.")
+
 # 3. FUNGSI AI
 def ai_call(year):
     try:
