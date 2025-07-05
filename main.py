@@ -21,15 +21,14 @@ client = OpenAI(
 # 2. INISIALISASI APLIKASI FLASK
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 jam
 
 def get_db_connection():
     """Fungsi untuk terhubung ke database PostgreSQL."""
     try:
         if os.getenv("POSTGRES_URL"):
-            # Untuk Vercel deployment
             conn = psycopg2.connect(os.getenv("POSTGRES_URL"))
         else:
-            # Untuk development lokal
             conn = psycopg2.connect(
                 host=os.getenv('DB_HOST', 'localhost'),
                 database=os.getenv('DB_NAME', 'web_ajaib'),
@@ -51,7 +50,6 @@ def init_database():
         return
     
     cur = conn.cursor()
-    # Sintaks PostgreSQL
     cur.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -68,7 +66,6 @@ def init_database():
         )
     ''')
     
-    # Tabel untuk cache kuis harian
     cur.execute('''
         CREATE TABLE IF NOT EXISTS daily_quiz (
             tanggal DATE PRIMARY KEY,
@@ -83,7 +80,31 @@ def init_database():
 
 init_database()
 
-# 3. FUNGSI AI
+# 3. HELPER FUNCTION UNTUK CEK USER
+def get_current_user():
+    """Helper function untuk mendapatkan data user saat ini tanpa logout paksa."""
+    if 'user_id' not in session:
+        return None
+    
+    user_id = session['user_id']
+    conn = get_db_connection()
+    if not conn:
+        return None
+    
+    try:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
+        user_data = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return user_data
+    except Exception as e:
+        print(f"Error getting user data: {e}")
+        if conn:
+            conn.close()
+        return None
+
+# 4. FUNGSI AI
 def ai_call(year):
     try:
         response = client.chat.completions.create(
@@ -106,7 +127,7 @@ AVATAR_STYLES = [
     'open-peeps', 'personas', 'pixel-art', 'shapes'
 ]
 
-# --- FUNGSI-FUNGSI LOGIKA KUIS ---
+# --- FUNGSI-FUNGSI LOGIKA KUIS (tetap sama) ---
 def muat_soal_json():
     try:
         with open('kuis.json', 'r', encoding='utf-8') as f:
@@ -318,21 +339,9 @@ def siapkan_kuis_harian():
 @app.route("/")
 def hello_world():
     """Rute utama: Menampilkan dashboard jika login, atau halaman tamu jika belum."""
-    if 'user_id' in session:
-        user_id = session['user_id']
-        conn = get_db_connection()
-        if conn:
-            cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
-            user_data = cursor.fetchone()
-            cursor.close()
-            conn.close()
-            
-            if user_data:
-                return render_template('dashboard.html', user=user_data, logged_in=True)
-            else:
-                session.clear()
-
+    user_data = get_current_user()
+    if user_data:
+        return render_template('dashboard.html', user=user_data, logged_in=True)
     return render_template('home.html', Web_title="WEB AJAIB")
 
 # --- RUTE-RUTE KUIS ---
@@ -357,18 +366,15 @@ def halaman_kuis():
 
     hari_ini = date.today()
     
-    # Cek apakah hari berbeda, jika ya reset counter
     if user and user['kuis_terakhir_dimainkan'] != hari_ini:
         cursor.execute('UPDATE users SET kuis_dimainkan_hari_ini = 0 WHERE id = %s', (user_id,))
         print("DEBUG: Reset counter kuis untuk hari baru")
     
-    # Ambil data terbaru setelah reset
     cursor.execute('SELECT kuis_terakhir_dimainkan, kuis_dimainkan_hari_ini FROM users WHERE id = %s', (user_id,))
     user = cursor.fetchone()
     
     kuis_dimainkan = user['kuis_dimainkan_hari_ini'] if user else 0
     
-    # Cek batas 3x sehari
     if kuis_dimainkan >= 3:
         print(f"DEBUG: User sudah main {kuis_dimainkan}x hari ini")
         flash(f'Anda sudah mengerjakan kuis 3x hari ini ({kuis_dimainkan}/3). Coba lagi besok!', 'warning')
@@ -399,6 +405,9 @@ def halaman_kuis():
 @app.route('/kuis/kerjakan', methods=['GET', 'POST'])
 def kerjakan_kuis():
     print("DEBUG: Masuk kerjakan kuis")
+    
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
     
     kuis_harian = session.get('kuis_harian', [])
     if not kuis_harian:
@@ -431,14 +440,10 @@ def kerjakan_kuis():
         conn = get_db_connection()
         if conn:
             cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            # Update poin
             cursor.execute('UPDATE users SET poin = poin + %s WHERE id = %s', (skor_akhir, user_id))
-            # Update tanggal terakhir main
             cursor.execute('UPDATE users SET kuis_terakhir_dimainkan = %s WHERE id = %s', (hari_ini, user_id))
-            # Tambah counter jumlah main hari ini
             cursor.execute('UPDATE users SET kuis_dimainkan_hari_ini = kuis_dimainkan_hari_ini + 1 WHERE id = %s', (user_id,))
             
-            # Ambil jumlah main yang terbaru
             cursor.execute('SELECT kuis_dimainkan_hari_ini FROM users WHERE id = %s', (user_id,))
             user_data = cursor.fetchone()
             cursor.close()
@@ -446,6 +451,7 @@ def kerjakan_kuis():
         
         sisa_main = 3 - user_data['kuis_dimainkan_hari_ini']
 
+        # Hapus data kuis dari session
         session.pop('kuis_harian', None)
         session.pop('soal_kuis_idx', None)
         session.pop('skor_kuis', None)
@@ -468,19 +474,7 @@ def kerjakan_kuis():
 # --- RUTE-RUTE LAINNYA ---
 @app.route("/about")
 def about():
-    user_data = None
-    if 'user_id' in session:
-        user_id = session['user_id']
-        conn = get_db_connection()
-        if conn:
-            cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
-            user_data = cursor.fetchone()
-            cursor.close()
-            conn.close()
-            if not user_data:
-                session.clear()
-
+    user_data = get_current_user()  # Gunakan helper function
     return render_template('about.html', Web_title="Halaman About", user=user_data)
 
 @app.route("/docs")
@@ -520,19 +514,25 @@ def login():
             return redirect(url_for('login'))
 
         conn = get_db_connection()
-        user = None  # <-- Tambahkan ini untuk nilai default
+        user = None
 
         if conn:
-            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            cur.execute('SELECT * FROM users WHERE username = %s', (username,))
-            user = cur.fetchone() # 'user' akan diperbarui jika ditemukan
-            cur.close()
-            conn.close()
+            try:
+                cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+                user = cursor.fetchone()
+                cursor.close()
+                conn.close()
+            except Exception as e:
+                print(f"Login error: {e}")
+                if conn:
+                    conn.close()
         
-        # Sekarang pengecekan ini aman
         if user and check_password_hash(user['password'], password):
-            session.clear()
+            # JANGAN CLEAR SEMUA SESSION, hanya set yang diperlukan
             session['user_id'] = user['id']
+            session.permanent = True  # Buat session permanen
+            flash('Login berhasil!', 'success')
             return redirect(url_for('hello_world'))
         else:
             flash('Username atau Password salah!', 'error')
@@ -565,17 +565,21 @@ def daftar():
                     'INSERT INTO users (username, password, nama_lengkap, avatar_style) VALUES (%s, %s, %s, %s)',
                     (username, hashed_password, nama_lengkap, random_avatar_style)
                 )
-                conn.commit()
                 flash('Pendaftaran berhasil! Silakan login.', 'success')
+                cursor.close()
+                conn.close()
+                return redirect(url_for('login'))
             except psycopg2.IntegrityError:
                 flash('Username sudah terdaftar!', 'error')
                 cursor.close()
                 conn.close()
                 return redirect(url_for('daftar'))
-            finally:
+            except Exception as e:
+                print(f"Registration error: {e}")
+                flash('Terjadi kesalahan saat mendaftar!', 'error')
                 cursor.close()
                 conn.close()
-        return redirect(url_for('login'))
+                return redirect(url_for('daftar'))
 
     return render_template('daftar.html')
 
@@ -606,107 +610,121 @@ def edit_profile():
 @app.route('/stop_judol', methods=['GET', 'POST'])
 def stop_judol():
     if 'user_id' not in session:
-        flash('Anda harus login untuk mengakses halaman ini', 'danger')
+        flash('Anda harus login untuk mengakses halaman ini', 'error')
         return redirect(url_for('login'))
 
     user_id = session['user_id']
     conn = get_db_connection()
     if not conn:
-        return jsonify({'sukses': False, 'pesan': 'Database error!'})
-
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        if request.method == 'POST':
+            return jsonify({'sukses': False, 'pesan': 'Database error!'})
+        else:
+            flash('Database error!', 'error')
+            return redirect(url_for('hello_world'))
 
     if request.method == 'POST':
-        data = request.get_json()
-        bet_amount = data.get('bet_amount')
-
-        if not isinstance(bet_amount, int):
-            cursor.close()
-            conn.close()
-            return jsonify({'sukses': False, 'pesan': 'Jumlah taruhan tidak valid.'})
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
-        if bet_amount < 10:
-            cursor.close()
-            conn.close()
-            return jsonify({'sukses': False, 'pesan': 'Taruhan minimal adalah 10 poin.'})
+        try:
+            data = request.get_json()
+            bet_amount = data.get('bet_amount')
 
-        cursor.execute('SELECT poin, judol_losing_streak, judol_bomb_strike_active FROM users WHERE id = %s', (user_id,))
-        user = cursor.fetchone()
+            if not isinstance(bet_amount, int):
+                return jsonify({'sukses': False, 'pesan': 'Jumlah taruhan tidak valid.'})
+            
+            if bet_amount < 10:
+                return jsonify({'sukses': False, 'pesan': 'Taruhan minimal adalah 10 poin.'})
 
-        if user['poin'] < bet_amount:
-            cursor.close()
-            conn.close()
-            return jsonify({'sukses': False, 'pesan': f'Poin Anda ({user["poin"]}) tidak cukup untuk bertaruh {bet_amount} poin.'})
+            cursor.execute('SELECT poin, judol_losing_streak, judol_bomb_strike_active FROM users WHERE id = %s', (user_id,))
+            user = cursor.fetchone()
 
-        losing_streak = user['judol_losing_streak']
-        bomb_strike_active = user['judol_bomb_strike_active']
-        
-        jenis_kemenangan = "kalah"
-        if bomb_strike_active and random.random() < 0.70:
-            jenis_kemenangan = "bom_jackpot"
-        elif losing_streak >= 3 and random.random() < 0.40:
-            jenis_kemenangan = "normal_jackpot"
-        elif random.random() < 0.01:
-             jenis_kemenangan = "bom_jackpot"
-        elif random.random() < 0.05: 
-            jenis_kemenangan = "13_jackpot"
-        elif random.random() < 0.15:
-            jenis_kemenangan = "normal_jackpot"
-        
-        simbol_normal = ['judol1.png', 'judol2.png', 'judol4.png', 'judol6.png']
-        hasil_spin = []
-        pesan = ""
-        
-        cursor.execute('UPDATE users SET judol_bomb_strike_active = 0 WHERE id = %s', (user_id,))
+            if not user:
+                return jsonify({'sukses': False, 'pesan': 'User tidak ditemukan.'})
 
-        if jenis_kemenangan == "bom_jackpot":
-            hasil_spin = ['judol3.png', 'judol3.png', 'judol3.png']
-            poin_hilang = math.floor(user['poin'] * 0.5)
-            pesan = f"BOOM! Anda kehilangan {poin_hilang} poin. Risiko besar tidak selalu membawa hasil baik."
-            cursor.execute('UPDATE users SET poin = poin - %s, judol_losing_streak = 0 WHERE id = %s', (poin_hilang, user_id))
-        
-        elif jenis_kemenangan == "13_jackpot":
-            hasil_spin = ['judol5.png', 'judol5.png', 'judol5.png']
-            pesan = "Angka 13... Sesuatu yang buruk akan terjadi."
-            cursor.execute('UPDATE users SET poin = poin - %s, judol_losing_streak = 0, judol_bomb_strike_active = 1 WHERE id = %s', (bet_amount, user_id))
+            if user['poin'] < bet_amount:
+                return jsonify({'sukses': False, 'pesan': f'Poin Anda ({user["poin"]}) tidak cukup untuk bertaruh {bet_amount} poin.'})
 
-        elif jenis_kemenangan == "normal_jackpot":
-            simbol_jackpot = random.choice(simbol_normal)
-            hasil_spin = [simbol_jackpot, simbol_jackpot, simbol_jackpot]
-            poin_didapat = bet_amount * 2 
-            pesan = f"Selamat! Anda memenangkan {poin_didapat} poin. Dewi fortuna tersenyum pada mu."
-            cursor.execute('UPDATE users SET poin = poin + %s, judol_losing_streak = 0 WHERE id = %s', (poin_didapat, user_id))
-        
-        else:
-            if bet_amount == user['poin']:
-                pesan = f"Anda mempertaruhkan segalanya ({bet_amount} poin) dan kehilangan semuanya. Inilah pelajaran paling pahit dari judi."
+            losing_streak = user['judol_losing_streak']
+            bomb_strike_active = user['judol_bomb_strike_active']
+            
+            jenis_kemenangan = "kalah"
+            if bomb_strike_active and random.random() < 0.70:
+                jenis_kemenangan = "bom_jackpot"
+            elif losing_streak >= 3 and random.random() < 0.40:
+                jenis_kemenangan = "normal_jackpot"
+            elif random.random() < 0.01:
+                 jenis_kemenangan = "bom_jackpot"
+            elif random.random() < 0.05: 
+                jenis_kemenangan = "13_jackpot"
+            elif random.random() < 0.15:
+                jenis_kemenangan = "normal_jackpot"
+            
+            simbol_normal = ['judol1.png', 'judol2.png', 'judol4.png', 'judol6.png']
+            hasil_spin = []
+            pesan = ""
+            
+            cursor.execute('UPDATE users SET judol_bomb_strike_active = 0 WHERE id = %s', (user_id,))
+
+            if jenis_kemenangan == "bom_jackpot":
+                hasil_spin = ['judol3.png', 'judol3.png', 'judol3.png']
+                poin_hilang = math.floor(user['poin'] * 0.5)
+                pesan = f"BOOM! Anda kehilangan {poin_hilang} poin. Risiko besar tidak selalu membawa hasil baik."
+                cursor.execute('UPDATE users SET poin = poin - %s, judol_losing_streak = 0 WHERE id = %s', (poin_hilang, user_id))
+            
+            elif jenis_kemenangan == "13_jackpot":
+                hasil_spin = ['judol5.png', 'judol5.png', 'judol5.png']
+                pesan = "Angka 13... Sesuatu yang buruk akan terjadi."
+                cursor.execute('UPDATE users SET poin = poin - %s, judol_losing_streak = 0, judol_bomb_strike_active = 1 WHERE id = %s', (bet_amount, user_id))
+
+            elif jenis_kemenangan == "normal_jackpot":
+                simbol_jackpot = random.choice(simbol_normal)
+                hasil_spin = [simbol_jackpot, simbol_jackpot, simbol_jackpot]
+                poin_didapat = bet_amount * 2 
+                pesan = f"Selamat! Anda memenangkan {poin_didapat} poin. Dewi fortuna tersenyum pada mu."
+                cursor.execute('UPDATE users SET poin = poin + %s, judol_losing_streak = 0 WHERE id = %s', (poin_didapat, user_id))
+            
             else:
-                pesan = "Sayang sekali, kamu kurang beruntung. Mau Coba lagi? Bandar selalu suka orang yang optimis."
-            
-            while True:
-                hasil_spin = random.choices(simbol_normal + ['judol3.png', 'judol5.png'], k=3, weights=[20,20,20,20,5,5])
-                if not (hasil_spin[0] == hasil_spin[1] == hasil_spin[2]):
-                    break
-            
-            cursor.execute('UPDATE users SET poin = poin - %s, judol_losing_streak = judol_losing_streak + 1 WHERE id = %s', (bet_amount, user_id))
+                if bet_amount == user['poin']:
+                    pesan = f"Anda mempertaruhkan segalanya ({bet_amount} poin) dan kehilangan semuanya. Inilah pelajaran paling pahit dari judi."
+                else:
+                    pesan = "Sayang sekali, kamu kurang beruntung. Mau Coba lagi? Bandar selalu suka orang yang optimis."
+                
+                while True:
+                    hasil_spin = random.choices(simbol_normal + ['judol3.png', 'judol5.png'], k=3, weights=[20,20,20,20,5,5])
+                    if not (hasil_spin[0] == hasil_spin[1] == hasil_spin[2]):
+                        break
+                
+                cursor.execute('UPDATE users SET poin = poin - %s, judol_losing_streak = judol_losing_streak + 1 WHERE id = %s', (bet_amount, user_id))
 
-        cursor.execute('SELECT poin FROM users WHERE id = %s', (user_id,))
-        user_terbaru = cursor.fetchone()
+            cursor.execute('SELECT poin FROM users WHERE id = %s', (user_id,))
+            user_terbaru = cursor.fetchone()
+
+            return jsonify({
+                'sukses': True,
+                'hasil_spin': hasil_spin,
+                'pesan': pesan, 
+                'poin_terbaru': user_terbaru['poin']
+            })
+            
+        except Exception as e:
+            print(f"Stop Judol error: {e}")
+            return jsonify({'sukses': False, 'pesan': 'Terjadi kesalahan server.'})
+        finally:
+            cursor.close()
+            conn.close()
+    else:
+        # GET request - tampilkan halaman
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
+        user_data = cursor.fetchone()
         cursor.close()
         conn.close()
-
-        return jsonify({
-            'sukses': True,
-            'hasil_spin': hasil_spin,
-            'pesan': pesan, 
-            'poin_terbaru': user_terbaru['poin']
-        })
-
-    cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
-    user_data = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    return render_template('judol.html', user=user_data)
+        
+        if not user_data:
+            flash('Data user tidak ditemukan!', 'error')
+            return redirect(url_for('hello_world'))
+            
+        return render_template('judol.html', user=user_data)
                     
 @app.route("/logout")
 def logout():
