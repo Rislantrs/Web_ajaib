@@ -565,6 +565,7 @@ def daftar():
                     'INSERT INTO users (username, password, nama_lengkap, avatar_style) VALUES (%s, %s, %s, %s)',
                     (username, hashed_password, nama_lengkap, random_avatar_style)
                 )
+                conn.commit()
                 flash('Pendaftaran berhasil! Silakan login.', 'success')
             except psycopg2.IntegrityError:
                 flash('Username sudah terdaftar!', 'error')
