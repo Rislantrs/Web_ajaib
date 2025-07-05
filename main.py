@@ -7,7 +7,7 @@ import os
 from openai import OpenAI
 import random
 import math
-from datetime import date
+from datetime import date, timedelta
 import json
 import time
 from dotenv import load_dotenv
@@ -18,10 +18,20 @@ client = OpenAI(
     base_url="https://api.groq.com/openai/v1"
 )
 
-# 2. INISIALISASI APLIKASI FLASK
+# 2. INISIALISASI APLIKASI FLASK DENGAN SESSION STABIL
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.urandom(24)
-app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 jam
+
+# PERBAIKI: Konfigurasi session yang stabil
+if os.getenv('SECRET_KEY'):
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+else:
+    app.config['SECRET_KEY'] = 'web-ajaib-secret-key-2025-stable'  # Fixed key untuk development
+
+# Session configuration untuk mencegah logout otomatis
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # 7 hari
+app.config['SESSION_COOKIE_SECURE'] = False  # Set True untuk HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 def get_db_connection():
     """Fungsi untuk terhubung ke database PostgreSQL."""
@@ -78,9 +88,7 @@ def init_database():
     conn.close()
     print("Database PostgreSQL initialized successfully.")
 
-init_database()
-
-# 3. HELPER FUNCTION UNTUK CEK USER
+# 3. HELPER FUNCTION UNTUK CEK USER TANPA LOGOUT PAKSA
 def get_current_user():
     """Helper function untuk mendapatkan data user saat ini tanpa logout paksa."""
     if 'user_id' not in session:
@@ -89,6 +97,8 @@ def get_current_user():
     user_id = session['user_id']
     conn = get_db_connection()
     if not conn:
+        # JANGAN CLEAR SESSION jika database error
+        print("Database connection failed, but keeping session")
         return None
     
     try:
@@ -97,6 +107,11 @@ def get_current_user():
         user_data = cursor.fetchone()
         cursor.close()
         conn.close()
+        
+        # JANGAN CLEAR SESSION jika user tidak ditemukan
+        if not user_data:
+            print(f"User {user_id} not found in database, but keeping session")
+        
         return user_data
     except Exception as e:
         print(f"Error getting user data: {e}")
@@ -127,7 +142,7 @@ AVATAR_STYLES = [
     'open-peeps', 'personas', 'pixel-art', 'shapes'
 ]
 
-# --- FUNGSI-FUNGSI LOGIKA KUIS (tetap sama) ---
+# --- FUNGSI-FUNGSI LOGIKA KUIS ---
 def muat_soal_json():
     try:
         with open('kuis.json', 'r', encoding='utf-8') as f:
@@ -334,6 +349,12 @@ def siapkan_kuis_harian():
     print(f"DEBUG: Total soal final: {len(soal_harian)}")
     return soal_harian[:10]
 
+# DEBUG SESSION MIDDLEWARE
+@app.before_request
+def log_session_info():
+    if request.endpoint and request.endpoint not in ['static']:
+        print(f"Route: {request.endpoint}, Session User ID: {session.get('user_id', 'Not logged in')}")
+
 # 5. RUTE-RUTE APLIKASI WEB
 
 @app.route("/")
@@ -474,7 +495,7 @@ def kerjakan_kuis():
 # --- RUTE-RUTE LAINNYA ---
 @app.route("/about")
 def about():
-    user_data = get_current_user()  # Gunakan helper function
+    user_data = get_current_user()
     return render_template('about.html', Web_title="Halaman About", user=user_data)
 
 @app.route("/docs")
@@ -483,6 +504,8 @@ def docs():
 
 @app.route("/usia", methods=['GET', 'POST'])
 def usia():
+    print(f"Usia route - Session user_id: {session.get('user_id')}")
+    
     if 'user_id' not in session:
         flash('Anda harus login untuk mengakses halaman ini.', 'error')
         return redirect(url_for('login'))
@@ -529,10 +552,12 @@ def login():
                     conn.close()
         
         if user and check_password_hash(user['password'], password):
-            # JANGAN CLEAR SEMUA SESSION, hanya set yang diperlukan
+            # Set session dengan permanent=True untuk durability
             session['user_id'] = user['id']
-            session.permanent = True  # Buat session permanen
+            session.permanent = True
+            
             flash('Login berhasil!', 'success')
+            print(f"User {user['username']} logged in successfully with session ID: {session['user_id']}")
             return redirect(url_for('hello_world'))
         else:
             flash('Username atau Password salah!', 'error')
@@ -659,20 +684,21 @@ def stop_judol():
             elif random.random() < 0.15:
                 jenis_kemenangan = "normal_jackpot"
             
-            simbol_normal = ['judol1.png', 'judol2.png', 'judol4.png', 'judol6.png']
+            # PERBAIKI: Konsistensi nama file dengan J besar
+            simbol_normal = ['Judol1.png', 'Judol2.png', 'Judol4.png', 'Judol6.png']
             hasil_spin = []
             pesan = ""
             
             cursor.execute('UPDATE users SET judol_bomb_strike_active = 0 WHERE id = %s', (user_id,))
 
             if jenis_kemenangan == "bom_jackpot":
-                hasil_spin = ['judol3.png', 'judol3.png', 'judol3.png']
+                hasil_spin = ['Judol3.png', 'Judol3.png', 'Judol3.png']
                 poin_hilang = math.floor(user['poin'] * 0.5)
                 pesan = f"BOOM! Anda kehilangan {poin_hilang} poin. Risiko besar tidak selalu membawa hasil baik."
                 cursor.execute('UPDATE users SET poin = poin - %s, judol_losing_streak = 0 WHERE id = %s', (poin_hilang, user_id))
             
             elif jenis_kemenangan == "13_jackpot":
-                hasil_spin = ['judol5.png', 'judol5.png', 'judol5.png']
+                hasil_spin = ['Judol5.png', 'Judol5.png', 'Judol5.png']
                 pesan = "Angka 13... Sesuatu yang buruk akan terjadi."
                 cursor.execute('UPDATE users SET poin = poin - %s, judol_losing_streak = 0, judol_bomb_strike_active = 1 WHERE id = %s', (bet_amount, user_id))
 
@@ -690,7 +716,8 @@ def stop_judol():
                     pesan = "Sayang sekali, kamu kurang beruntung. Mau Coba lagi? Bandar selalu suka orang yang optimis."
                 
                 while True:
-                    hasil_spin = random.choices(simbol_normal + ['judol3.png', 'judol5.png'], k=3, weights=[20,20,20,20,5,5])
+                    # PERBAIKI: Konsistensi nama file
+                    hasil_spin = random.choices(simbol_normal + ['Judol3.png', 'Judol5.png'], k=3, weights=[20,20,20,20,5,5])
                     if not (hasil_spin[0] == hasil_spin[1] == hasil_spin[2]):
                         break
                 
@@ -734,4 +761,5 @@ def logout():
 
 # 6. MENJALANKAN APLIKASI
 if __name__ == "__main__":
+    init_database()
     app.run(debug=True)
